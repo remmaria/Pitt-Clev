@@ -45,7 +45,7 @@ When running on a computing cluster (e.g., CRC), it is recommended to use the $S
 ```
 
 ## Example Script Usage
-![Pipeline diagram](images/pipe_ex1_red.png)
+![Pipeline diagram](images/pipeline.png)
 ```bash
 docker run --rm -v $PWD:$PWD -w $PWD pipe_dmri pipeline \
     -t $N_CPUS \      # optional:Default 1
