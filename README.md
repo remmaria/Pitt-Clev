@@ -60,10 +60,10 @@ docker run --rm -v $PWD:$PWD -w $PWD pipe_dmri pipeline \
 ```
 This script performs:
 
-1. `--mppca`: MP-PCA denoising (not exporting noise_map and noise_residuals)
+1. `--mppca`: MP-PCA denoising
 2. `--degibbs`: Gibbs ringing removal
-3. `--preproc PA -i main_folder/session_01/dwis_AP.nii.gz`: Eddy + motion correction (with inverse phase-encoding)
-4. `--dti 1000`: DTI fitting with shell of 1000 for AD, MD and RD computing. Adjust this value according to the diffusion sequence used. FA considers all shells.
+3. `--preproc PA -i main_folder/session_01/dwis_AP.nii.gz`: Eddy + motion correction (with inverse phase-encoding) - main acquisition = PA
+4. `--dti 1000`: DTI fitting considering shell of 1000s/mm2 for AD, MD, RD and FA computing. Adjust this value according to the diffusion sequence used.
 5. `--skull_strip`: Skull stripping using SynthStrip
 6. `--wm_seg csd_msmt -l CC_1...SLF_III_right`: WM bundle segmentation using [TractSeg](https://github.com/MIC-DKFZ/TractSeg) with FOD method 'csd_msmt' (multi-shell) for WM Tracts (CC_1–CC_7, CG (RL), SLF_I-III (RL)). Adjust to `csd` for single-shell sequence.
 7. `--stats CC_1...SLF_III_right-dti`: Statistical analysis using TractSeg bundle masks (CC_1–CC_7, CG (RL), SLF_I-III (RL)) applied to DTI metrics (AD, MD, RD, FA).
@@ -78,8 +78,8 @@ This script performs:
 > 
 > More info: https://github.com/MIC-DKFZ/TractSeg/tree/master
 
-The run_pipeline script generates a `stats_analysis.tsv` file for each session. To speed up processing, you can run sessions independently in parallel. Once all sessions have been processed, you can merge the results using:
+The `pipeline` script generates a `stats_analysis.tsv` file for each session. To speed up processing, you can run sessions independently in parallel. Once all sessions have been processed, you can merge the results using:
 ```bash
-docker run -v $PWD:$PWD -w $PWD pipe_dmri stats_merge --input {input_folder} --output path/to/output/results_merged.tsv [--labels path/to/roi_names.tsv
+docker run -v $PWD:$PWD -w $PWD pipe_dmri stats_merge --input {input_folder} --output path/to/output/results_merged.tsv
 ```
 Replace `{input_folder}` with the directory that contains all session folders — this is the same as the `main_folder` or `output_folder`, depending on how you configured your pipeline.
