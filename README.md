@@ -47,7 +47,7 @@ When running on a computing cluster (e.g., CRC), it is recommended to use the $S
 ## Example Script Usage
 ![Pipeline diagram](images/pipeline_long.png)
 ```bash
-docker run --rm -v $PWD:$PWD -w $PWD pipe_dmri pipeline \
+docker run --rm -v $PWD:$PWD -w $PWD tsantini/dwipreproc:remmaria_clev \
     --threads $N_CPUS \      # optional:Default 1
     --output_path $output_path \ # optional: Default same folder as input dwi
     --tmp_folder $tmp_folder \  # optional: Default: /tmp
@@ -55,7 +55,7 @@ docker run --rm -v $PWD:$PWD -w $PWD pipe_dmri pipeline \
     --mppca --degibbs --preproc PA --inversed main_folder/session_01/dwis_AP.nii.gz \
     --dti 1000 --skull_strip \
     --wm_seg csd_msmt --wm_labels CC_1,CC_2,CC_3,CC_4,CC_5,CC_6,CC_7,CG_left,CG_right,SLF_I_left,SLF_I_right,SLF_II_left,SLF_II_right,SLF_III_left,SLF_III_right \
-    --stats CC_1,CC_2,CC_3,CC_4,CC_5,CC_6,CC_7,CG_left,CG_right,SLF_I_left,SLF_I_right,SLF_II_left,SLF_II_right,SLF_III_left,SLF_III_right-dti \
+    --stats dti-tractseg:CC_1,CC_2,CC_3,CC_4,CC_5,CC_6,CC_7,CG_left,CG_right,SLF_I_left,SLF_I_right,SLF_II_left,SLF_II_right,SLF_III_left,SLF_III_right \
     --info $tsv_info      # optional
 ```
 This script performs:
@@ -66,7 +66,7 @@ This script performs:
 4. `--dti 1000`: DTI fitting considering shell of 1000s/mm2 for AD, MD, RD and FA computing. Adjust this value according to the diffusion sequence used.
 5. `--skull_strip`: Skull stripping using SynthStrip
 6. `--wm_seg csd_msmt -l CC_1...SLF_III_right`: WM bundle segmentation using [TractSeg](https://github.com/MIC-DKFZ/TractSeg) with FOD method 'csd_msmt' (multi-shell) for WM Tracts (CC_1–CC_7, CG (RL), SLF_I-III (RL)). Adjust to `csd` for single-shell sequence.
-7. `--stats CC_1...SLF_III_right-dti`: Statistical analysis using TractSeg bundle masks (CC_1–CC_7, CG (RL), SLF_I-III (RL)) applied to DTI metrics (AD, MD, RD, FA).
+7. `--stats dti-tractseg:CC_1...SLF_III_right`: Statistical analysis using TractSeg bundle masks (CC_1–CC_7, CG (RL), SLF_I-III (RL)) applied to DTI metrics (AD, MD, RD, FA).
 8. `--info $tsv_info`: TSV info file (sep=tab) – additional information about each subject/session that can be included in the statistical output. The `{session}` name must match the SessionID column in the TSV file exactly. Works fine without it.
 
 > For best results using TractSeg:
