@@ -47,7 +47,7 @@ When running on a computing cluster (e.g., CRC), it is recommended to use the $S
 ## Example Script Usage
 ![Pipeline diagram](images/pipeline_long.png)
 ```bash
-docker run --rm -v $PWD:$PWD -w $PWD tsantini/dwipreproc:remmaria_clev \
+docker run --rm -v $PWD:$PWD -w $PWD tsantini/dwipreproc:remmaria_clev pipeline \
     --threads $N_CPUS \      # optional:Default 1
     --output_path $output_path \ # optional: Default same folder as input dwi
     --tmp_folder $tmp_folder \  # optional: Default: /tmp
