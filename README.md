@@ -47,7 +47,7 @@ When running on a computing cluster (e.g., CRC), it is recommended to use the $S
 ## Example Script Usage
 ![Pipeline diagram](images/pipeline_long.png)
 ```bash
-docker run --rm -v $PWD:$PWD -w $PWD remmaria/pipe_dmri:clev_v2 pipeline \
+docker run --rm -v $PWD:$PWD -w $PWD remmaria/pipe_dmri:clev_v3 pipeline \
     --threads $N_CPUS \      # optional:Default 1
     --output_path $output_path \ # optional: Default same folder as input dwi
     --tmp_folder $tmp_folder \  # optional: Default: /tmp
@@ -80,6 +80,6 @@ This script performs:
 
 The `pipeline` script generates a `stats_analysis.tsv` file for each session. To speed up processing, you can run sessions independently in parallel. Once all sessions have been processed, you can merge the results using:
 ```bash
-docker run --rm -v $PWD:$PWD -w $PWD remmaria/pipe_dmri:clev_v2 stats_merge --input {input_folder} --output path/to/output/results_merged.tsv
+docker run --rm -v $PWD:$PWD -w $PWD remmaria/pipe_dmri:clev_v3 stats_merge --input {input_folder} --output path/to/output/results_merged.tsv
 ```
 Replace `{input_folder}` with the directory that contains all session folders — this is the same as the `main_folder` or `output_folder`, depending on how you configured your pipeline.
