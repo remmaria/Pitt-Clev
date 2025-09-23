@@ -45,7 +45,7 @@ When running on a computing cluster (e.g., CRC), it is recommended to use the $S
 ```
 
 ## Example Script Usage - script pipeline
-![Pipeline diagram](images/pipeline_long.png)
+![Pipeline diagram](images/pipe_stats_v4.png)
 ```bash
 docker run --rm -v $PWD:$PWD -w $PWD remmaria/pipe_dmri:clev_v4 \
     pipeline \
