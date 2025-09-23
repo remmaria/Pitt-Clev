@@ -1,4 +1,4 @@
-# Docker pipe_dmri: Diffusion MRI Processing Pipeline
+# Docker pipe_dmri: Diffusion MRI Processing Pipeline - "Version v4.0" - remmaria/pipe_dmri:clev_v4
 
 ## Folder and Files Structure
 
@@ -44,19 +44,23 @@ When running on a computing cluster (e.g., CRC), it is recommended to use the $S
 --tmp_folder $SLURM_SCRATCH
 ```
 
-## Example Script Usage
+## Example Script Usage - script pipeline
 ![Pipeline diagram](images/pipeline_long.png)
 ```bash
-docker run --rm -v $PWD:$PWD -w $PWD remmaria/pipe_dmri:clev_v3 pipeline \
+docker run --rm -v $PWD:$PWD -w $PWD remmaria/pipe_dmri:clev_v4 \
+    pipeline \
     --threads $N_CPUS \      # optional:Default 1
     --output_path $output_path \ # optional: Default same folder as input dwi
     --tmp_folder $tmp_folder \  # optional: Default: /tmp
     --dwi main_folder/session_01/dwis_PA.nii.gz \
     --mppca --degibbs --preproc PA --inversed main_folder/session_01/dwis_AP.nii.gz \
     --dti 1000 --skull_strip \
-    --wm_seg csd_msmt --wm_labels CC,CC_1,CC_2,CC_3,CC_4,CC_5,CC_6,CC_7,CG_left,CG_right,SLF_I_left,SLF_I_right,SLF_II_left,SLF_II_right,SLF_III_left,SLF_III_right \
-    --stats dti-tractseg:CC,CC_1,CC_2,CC_3,CC_4,CC_5,CC_6,CC_7,CG_left,CG_right,SLF_I_left,SLF_I_right,SLF_II_left,SLF_II_right,SLF_III_left,SLF_III_right \
-    --info $tsv_info      # optional
+    --wm_seg $fod_method \
+    --wm_labels CC,CC_1,CC_2,CC_3,CC_4,CC_5,CC_6,CC_7,CG_left,CG_right,SLF_I_left,SLF_I_right,SLF_II_left,SLF_II_right,SLF_III_left,SLF_III_right \
+    --brain_seg 0 \
+    --mask_seg '3;42:CCortex' \
+    --md_csf 0.002
+
 ```
 This script performs:
 
@@ -64,22 +68,39 @@ This script performs:
 2. `--degibbs`: Gibbs ringing removal
 3. `--preproc PA -i main_folder/session_01/dwis_AP.nii.gz`: Eddy + motion correction (with inverse phase-encoding) - main acquisition = PA
 4. `--dti 1000`: DTI fitting considering shell of 1000s/mm2 for AD, MD, RD and FA computing. Adjust this value according to the diffusion sequence used.
-5. `--skull_strip`: Skull stripping using SynthStrip
-6. `--wm_seg csd_msmt -l CC...SLF_III_right`: WM bundle segmentation using [TractSeg](https://github.com/MIC-DKFZ/TractSeg) with FOD method 'csd_msmt' (multi-shell) for WM Tracts (CC, CC_1–CC_7, CG (RL), SLF_I-III (RL)). Adjust to `csd` for single-shell sequence.
-7. `--stats dti-tractseg:CC...SLF_III_right`: Statistical analysis using TractSeg bundle masks (CC, CC_1–CC_7, CG (RL), SLF_I-III (RL)) applied to DTI metrics (AD, MD, RD, FA).
-8. `--info $tsv_info`: TSV info file (sep=tab) – additional information about each subject/session that can be included in the statistical output. The `{session}` name must match the SessionID column in the TSV file exactly. Works fine without it.
+5. `--skull_strip`: Skull stripping using SynthStrip.
+6. `--wm_seg $fod_method`: WM bundle segmentation using [TractSeg](https://github.com/MIC-DKFZ/TractSeg) - specify FOD method ('csd_msmt' for multi-shell | 'csd' for single-shell).
+7. `wm_labels CC...SLF_III_right`:  Use TractSeg in WM Tracts (CC, CC_1–CC_7, CG (RL), SLF_I-III (RL)).
+8. `brain_seg 0`: Brain Segmentation using SynthSeg.
+9. `mask_seg '3;42:CCortex' `: from SynthSeg mask, generate Cerebral Cortex mask (labels 3 and 42).
+10. `md_csf 0.002`: from MD metric, generates a CSF mask using lower threshold of 0.002.
 
 > For best results using TractSeg:
 > - Ensure **MNI-compatible orientation** (e.g., like HCP data)
 > - Make sure **LEFT hemisphere** is properly aligned
 > - Use **isotropic voxel spacing**.
->
-> For single-shell data acquisition, use FOD method 'csd'. For multi-shell, you can use other FOD methods: `csd_msmt`, `csd_msmt_5tt`, etc.
 > 
 > More info: https://github.com/MIC-DKFZ/TractSeg/tree/master
 
-The `pipeline` script generates a `stats_analysis.tsv` file for each session. To speed up processing, you can run sessions independently in parallel. Once all sessions have been processed, you can merge the results using:
+After processing all sessions, you can run the script `run_stats` using the same docker.
+
 ```bash
-docker run --rm -v $PWD:$PWD -w $PWD remmaria/pipe_dmri:clev_v3 stats_merge --input {input_folder} --output path/to/output/results_merged.tsv
+docker run --rm -v $root_folder:$root_folder remmaria/pipe_dmri:clev_v4\
+    run_stats \
+    --sessions_folder ${main_folder} \
+    --stats_rois tractseg:CC,CC_1,CC_2,CC_3,CC_4,CC_5,CC_6,CC_7,CG_left,CG_right,SLF_I_left,SLF_I_right,SLF_II_left,SLF_II_right,SLF_III_left,SLF_III_right \
+    --stats_metrics gpdwis_PA_dti:fa,ad,md,rd \
+    --info_path ${info_file} \
+    --mask_exclude gpdwis_PA_geomcorr_maskseg_CCortex,gpdwis_PA_dti_md_maskCSFdil6 \
+    --verbose
 ```
-Replace `{input_folder}` with the directory that contains all session folders — this is the same as the `main_folder` or `output_folder`, depending on how you configured your pipeline.
+1. `--sessions_folder ${main_folder}`:
+2. `--stats_rois tractseg:CC...SLF_III_right`: Statistical analysis using TractSeg bundle masks (CC, CC_1–CC_7, CG (RL), SLF_I-III (RL))
+3. `--stats_metrics gpdwis_PA_dti:fa,ad,md,rd`: Statistics of DTI metrics (AD, MD, RD, FA) - name of files "gpdwis_PA" - it can vary according to preprocessing steps.
+4. `--info_path ${info_file}`: TSV info file (sep=tab) – additional information about each subject/session that can be included in the statistical output. The `{session}` name must match the SessionID column in the TSV file exactly. Works fine without it.
+5. `--mask_exclude gpdwis_PA_geomcorr_maskseg_CCortex,gpdwis_PA_dti_md_maskCSFdil6`: masks to exclude from statistics. In this case, Cerebral Cortex and CSF mask from MD dilated once.
+6. `--verbose`: show more information while calculating statistics. 
+
+`--sessions_folder` must be the directory that contains all session folders — this is the same as the `main_folder` or `output_folder`, depending on how you configured your pipeline.
+
+This script calculates median, percentils (25 and 75), mean and std of the designated metrics inside ROIs, disconsidering voxels of mask_exclude. If there are coincident masks, the statistics are weighted in that area, e.g, if there are 3 masks in one voxel, values will have a weight of 1/3 in each statistics.
