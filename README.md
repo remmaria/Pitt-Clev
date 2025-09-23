@@ -105,4 +105,4 @@ docker run --rm -v $root_folder:$root_folder remmaria/pipe_dmri:clev_v4\
 
 `--sessions_folder` must be the directory that contains all session folders — this is the same as the `main_folder` or `output_folder`, depending on how you configured your pipeline.
 
-This script computes the median, 25th and 75th percentiles, mean, and standard deviation of the specified metrics within ROIs, excluding voxels defined by mask_exclude. In areas where ROIs overlap, the statistics are weighted accordingly—for example, if three masks overlap in a voxel, each contributes with a weight of 1/3 to the calculations.
+This script computes the median, 25th and 75th percentiles, mean, and standard deviation of the specified metrics within ROIs, excluding voxels defined by mask_exclude. In areas where ROIs overlap, the statistics are weighted accordingly—for example, if three masks overlap in a voxel, each contributes with a weight of 1/3 to the calculations. A `weighted_mask.nii.gz` is created in each session, if you want to visualize the final mask used in statistical computation.
