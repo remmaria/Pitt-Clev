@@ -44,7 +44,7 @@ When running on a computing cluster (e.g., CRC), it is recommended to use the $S
 --tmp_folder $SLURM_SCRATCH
 ```
 
-## Example Script Usage - script pipeline
+## Example Script Usage - scripts pipeline and run_stats
 ![Pipeline diagram](images/pipe_stats_v4.png)
 ```bash
 docker run --rm -v $PWD:$PWD -w $PWD remmaria/pipe_dmri:clev_v4 \
@@ -82,6 +82,7 @@ This script performs:
 > 
 > More info: https://github.com/MIC-DKFZ/TractSeg/tree/master
 
+
 After processing all sessions, you can run the script `run_stats` using the same docker.
 
 ```bash
@@ -103,4 +104,4 @@ docker run --rm -v $root_folder:$root_folder remmaria/pipe_dmri:clev_v4\
 
 `--sessions_folder` must be the directory that contains all session folders — this is the same as the `main_folder` or `output_folder`, depending on how you configured your pipeline.
 
-This script calculates median, percentils (25 and 75), mean and std of the designated metrics inside ROIs, disconsidering voxels of mask_exclude. If there are coincident masks, the statistics are weighted in that area, e.g, if there are 3 masks in one voxel, values will have a weight of 1/3 in each statistics.
+This script computes the median, 25th and 75th percentiles, mean, and standard deviation of the specified metrics within ROIs, excluding voxels defined by mask_exclude. In areas where ROIs overlap, the statistics are weighted accordingly—for example, if three masks overlap in a voxel, each contributes with a weight of 1/3 to the calculations.
