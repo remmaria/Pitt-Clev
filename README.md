@@ -1,4 +1,5 @@
-# Docker pipe_dmri: Diffusion MRI Processing Pipeline - "Version v4.0" - remmaria/pipe_dmri:clev_v4
+# Docker pipe_dmri: Diffusion MRI Processing Pipeline
+### "v4.0" - remmaria/pipe_dmri:clev_v4
 
 ## Folder and Files Structure
 
