@@ -48,11 +48,11 @@ When running on a computing cluster (e.g., CRC), it is recommended to use the $S
 ## Example Script Usage - scripts pipeline and run_stats
 ![Pipeline diagram](images/pipe_stats_v4.png)
 ```bash
-docker run --rm -v $PWD:$PWD -w $PWD remmaria/pipe_dmri:clev_v4 \
+docker run --rm -v $PWD:$PWD remmaria/pipe_dmri:clev_v4 \
     pipeline \
-    --threads $N_CPUS \      # optional:Default 1
-    --output_path $output_path \ # optional: Default same folder as input dwi
-    --tmp_folder $tmp_folder \  # optional: Default: /tmp
+    --threads $N_CPUS \
+    --output_path $output_path \
+    --tmp_folder $tmp_folder \
     --dwi main_folder/session_01/dwis_PA.nii.gz \
     --mppca --degibbs --preproc PA --inversed main_folder/session_01/dwis_AP.nii.gz \
     --dti 1000 --skull_strip \
@@ -87,7 +87,7 @@ This script performs:
 After processing all sessions, you can run the script `run_stats` using the same docker.
 
 ```bash
-docker run --rm -v $root_folder:$root_folder remmaria/pipe_dmri:clev_v4\
+docker run --rm -v $PWD:$PWD remmaria/pipe_dmri:clev_v4\
     run_stats \
     --sessions_folder ${main_folder} \
     --stats_rois tractseg:CC,CC_1,CC_2,CC_3,CC_4,CC_5,CC_6,CC_7,CG_left,CG_right,SLF_I_left,SLF_I_right,SLF_II_left,SLF_II_right,SLF_III_left,SLF_III_right \
@@ -96,11 +96,11 @@ docker run --rm -v $root_folder:$root_folder remmaria/pipe_dmri:clev_v4\
     --mask_exclude gpdwis_PA_geomcorr_maskseg_CCortex,gpdwis_PA_dti_md_maskCSFdil6 \
     --verbose
 ```
-1. `--sessions_folder ${main_folder}`:
-2. `--stats_rois tractseg:CC...SLF_III_right`: Statistical analysis using TractSeg bundle masks (CC, CC_1–CC_7, CG (RL), SLF_I-III (RL))
-3. `--stats_metrics gpdwis_PA_dti:fa,ad,md,rd`: Statistics of DTI metrics (AD, MD, RD, FA) - name of files "gpdwis_PA" - it can vary according to preprocessing steps.
-4. `--info_path ${info_file}`: TSV info file (sep=tab) – additional information about each subject/session that can be included in the statistical output. The `{session}` name must match the SessionID column in the TSV file exactly. Works fine without it.
-5. `--mask_exclude gpdwis_PA_geomcorr_maskseg_CCortex,gpdwis_PA_dti_md_maskCSFdil6`: masks to exclude from statistics. In this case, Cerebral Cortex and CSF mask from MD dilated once.
+1. `--sessions_folder ${main_folder}`: Folder containing the sessions folder to generate stats.
+2. `--stats_rois tractseg:CC...SLF_III_right`: ROIs to be considered in the statistics. Format: prefix1:roi1,roi2;prefix2:roi1,roi2... Ex: for files tractseg_CC.nii.gz, tractseg_CC1.nii.gz, jhu_4.nii.gz -> tractseg:CC,CC1;jhu:4
+3. `--stats_metrics gpdwis_PA_dti:fa,ad,md,rd`: Metrics to be considered in the statistics. Format:prefix1:met1,met2;prefix2:met1,met2.... Ex: for files gpdwis_dti_fa.nii.gz ,gpdwis_dti_md.nii.gz and dwis_dki_mk.nii.gz -> gpdwis_dti:fa,md;dwis_dki:mk
+4. `--info_path ${info_file}`: Optional TSV info file (sep=tab) – additional information about each subject/session that can be included in the statistical output. The `{session}` name must match with a SessionID column in the TSV file exactly. Works fine without it.
+5. `--mask_exclude gpdwis_PA_geomcorr_maskseg_CCortex,gpdwis_PA_dti_md_maskCSFdil6`: optional. Filenames of the masks to be excluded from the statistics ROIs (nii.gz files separated with comma). Ex: for files mask1.nii.gz and mask2.nii.gz -> mask1,mask2
 6. `--verbose`: show more information while calculating statistics. 
 
 `--sessions_folder` must be the directory that contains all session folders — this is the same as the `main_folder` or `output_folder`, depending on how you configured your pipeline.
