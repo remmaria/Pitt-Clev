@@ -40,15 +40,18 @@ output_path/
 
 If desired, a temporary folder can be specified to store intermediate files (e.g., .mif files). If not provided, the default location is /tmp.
 When running on a computing cluster (e.g., CRC), it is recommended to use the $SLURM_SCRATCH directory:
-
 ```bash
 --tmp_folder $SLURM_SCRATCH
 ```
 
+> ## Attention!
+> When running the container with `docker run --rm -v $main_folder:$main_folder`, note that $main_folder is just an example. Ensure the required folders are mounted so the container can access main_folder (or output_folder, if configured) in both the pipeline and run_stats scripts.
+
+
 ## Example Script Usage - scripts pipeline and run_stats
 ![Pipeline diagram](images/pipe_stats_v4.png)
 ```bash
-docker run --rm -v $PWD:$PWD remmaria/pipe_dmri:clev_v4 \
+docker run --rm -v $main_folder:$main_folder remmaria/pipe_dmri:clev_v4 \
     pipeline \
     --threads $N_CPUS \
     --output_path $output_path \
@@ -87,7 +90,7 @@ This script performs:
 After processing all sessions, you can run the script `run_stats` using the same docker.
 
 ```bash
-docker run --rm -v $PWD:$PWD remmaria/pipe_dmri:clev_v4\
+docker run --rm -v $main_folder:$main_folder remmaria/pipe_dmri:clev_v4\
     run_stats \
     --sessions_folder ${main_folder} \
     --stats_rois tractseg:CC,CC_1,CC_2,CC_3,CC_4,CC_5,CC_6,CC_7,CG_left,CG_right,SLF_I_left,SLF_I_right,SLF_II_left,SLF_II_right,SLF_III_left,SLF_III_right \
